@@ -1,139 +1,81 @@
 using Microsoft.AspNetCore.Mvc;
-<<<<<<< HEAD
-=======
 using Microsoft.EntityFrameworkCore;
->>>>>>> c8bbbbb (deneme5)
 using DersNotlariYonetimSistemi.API.Data;
 using DersNotlariYonetimSistemi.API.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DersNotlariYonetimSistemi.API.Controllers
 {
     [ApiController]
-<<<<<<< HEAD
     [Route("api/notes")]
-=======
-    [Route("api/[controller]")]
->>>>>>> c8bbbbb (deneme5)
     public class NotesController : ControllerBase
     {
         private readonly AppDbContext _context;
+        public NotesController(AppDbContext context) => _context = context;
 
-        public NotesController(AppDbContext context)
-        {
-            _context = context;
-        }
-
-<<<<<<< HEAD
-        [HttpGet]
-        public IActionResult GetNotes()
-        {
-            var notes = _context.Notes
-                .Where(n => n.DeletedAt == null)
-                .ToList();
-=======
-        // Notları Listele
         [HttpGet]
         public async Task<IActionResult> GetNotes()
         {
             var notes = await _context.Notes
                 .Where(n => n.DeletedAt == null)
                 .ToListAsync();
->>>>>>> c8bbbbb (deneme5)
-
             return Ok(notes);
         }
 
-<<<<<<< HEAD
         [HttpPost]
-        public IActionResult AddNote(Note note)
-=======
-        // Not Ekle
-        [HttpPost]
-        public async Task<IActionResult> AddNote(Note note)
->>>>>>> c8bbbbb (deneme5)
+        [Authorize]
+        public async Task<IActionResult> AddNote([FromForm] string CourseName,
+                                                 [FromForm] string Description,
+                                                 IFormFile? file)
         {
-            note.CreatedAt = DateTime.Now;
-            note.UpdatedAt = DateTime.Now;
+            try
+            {
+                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (userIdClaim == null) return Unauthorized("UserId token’dan alınamadı");
+                int userId = int.Parse(userIdClaim);
 
-            _context.Notes.Add(note);
-<<<<<<< HEAD
-            _context.SaveChanges();
-=======
-            await _context.SaveChangesAsync();
->>>>>>> c8bbbbb (deneme5)
+                string? filePath = null;
+                if (file != null)
+                {
+                    var folder = Path.Combine("wwwroot/uploads");
+                    if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
 
-            return Ok(note);
+                    var uniqueFileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+                    var fullPath = Path.Combine(folder, uniqueFileName);
+
+                    using (var stream = new FileStream(fullPath, FileMode.Create))
+                        await file.CopyToAsync(stream);
+
+                    filePath = "/uploads/" + uniqueFileName;
+                }
+
+                var note = new Note
+                {
+                    CourseName = CourseName,
+                    Description = Description,
+                    FilePath = filePath,
+                    UserId = userId,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                _context.Notes.Add(note);
+                await _context.SaveChangesAsync();
+                return Ok(note);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
-<<<<<<< HEAD
-        [HttpDelete("{id}")]
-        public IActionResult DeleteNote(int id)
-        {
-            var note = _context.Notes.Find(id);
-
-            note.DeletedAt = DateTime.Now;
-
-            _context.SaveChanges();
-=======
-        // Not Güncelle
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateNote(int id, Note updatedNote)
-        {
-            var note = await _context.Notes.FindAsync(id);
-
-            if (note == null)
-                return NotFound();
-
-            note.CourseName = updatedNote.CourseName;
-            note.Description = updatedNote.Description;
-            note.UpdatedAt = DateTime.Now;
-
-            await _context.SaveChangesAsync();
-
-            return Ok(note);
-        }
-
-        // Soft Delete
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteNote(int id)
         {
             var note = await _context.Notes.FindAsync(id);
-
-            if (note == null)
-                return NotFound();
-
-            note.DeletedAt = DateTime.Now;
-
+            if (note == null) return NotFound();
+            note.DeletedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
-
-            return Ok();
-        }
-
-        // Arşiv
-        [HttpGet("archive")]
-        public async Task<IActionResult> GetArchive()
-        {
-            var notes = await _context.Notes
-                .Where(n => n.DeletedAt != null)
-                .ToListAsync();
-
-            return Ok(notes);
-        }
-
-        // Hard Delete
-        [HttpDelete("hard/{id}")]
-        public async Task<IActionResult> HardDelete(int id)
-        {
-            var note = await _context.Notes.FindAsync(id);
-
-            if (note == null)
-                return NotFound();
-
-            _context.Notes.Remove(note);
-
-            await _context.SaveChangesAsync();
->>>>>>> c8bbbbb (deneme5)
-
             return Ok();
         }
     }

@@ -1,41 +1,36 @@
-using DersNotlariYonetimSistemi.API.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace DersNotlariYonetimSistemi.API.Helpers;
-
-public class JwtService
+namespace DersNotlariYonetimSistemi.API.Helpers
 {
-    private readonly IConfiguration _configuration;
-
-    public JwtService(IConfiguration configuration)
+    public class JwtService
     {
-        _configuration = configuration;
-    }
+        private readonly string _secret;
 
-    public string GenerateToken(User user)
-    {
-        var key = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])
-        );
-
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        var claims = new[]
+        public JwtService(IConfiguration config)
         {
-            new Claim(ClaimTypes.Name, user.Username)
-        };
+            _secret = config["JwtSettings:Secret"];
+        }
 
-        var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"],
-            audience: _configuration["Jwt:Audience"],
-            claims: claims,
-            expires: DateTime.Now.AddHours(2),
-            signingCredentials: creds
-        );
+        public string GenerateToken(int userId)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_secret);
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new Claim[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, userId.ToString())
+                }),
+                Expires = DateTime.UtcNow.AddHours(2),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
+        }
     }
 }

@@ -9,10 +9,12 @@ function NoteCard({ note, refresh }) {
 
   return (
     <div style={{ border: "1px solid gray", margin: "10px", padding: "10px" }}>
-      <h3>{note.title}</h3>
+      <h3>{note.courseName}</h3>
       <p>{note.description}</p>
       {note.filePath && (
-        <a href={`https://localhost:5001/${note.filePath}`} target="_blank">Dosya İndir</a>
+        <a href={`http://localhost:5020${note.filePath}`} target="_blank" rel="noreferrer">
+          Dosya İndir
+        </a>
       )}
       <br />
       <button onClick={handleDelete}>Sil</button>
