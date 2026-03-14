@@ -1,42 +1,38 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../services/api";
 
-function Archive() {
+function Archive(){
 
-  const [notes,setNotes] = useState([]);
+const [notes,setNotes]=useState([])
 
-  const fetchArchive = async () => {
-    const res = await api.get("/notes/archive");
-    setNotes(res.data);
-  };
+useEffect(()=>{
 
-  const hardDelete = async (id) => {
-    await api.delete(`/notes/hard/${id}`);
-    fetchArchive();
-  };
+api.get("/notes/archive")
+.then(res=>setNotes(res.data))
+.catch(err=>console.log(err))
 
-  useEffect(() => {
-    fetchArchive();
-  }, []);
+},[])
 
-  return (
-    <div>
+return(
 
-      <h2>Arşiv</h2>
+<div>
 
-      {notes.map(note => (
-        <div key={note.id}>
-          <h3>{note.title}</h3>
+<h2>Arşiv</h2>
 
-          <button onClick={() => hardDelete(note.id)}>
-            Kalıcı Sil
-          </button>
+{notes.map(note=>(
+<div key={note.id}>
 
-        </div>
-      ))}
+<h3>{note.courseName}</h3>
 
-    </div>
-  );
+<p>{note.description}</p>
+
+</div>
+))}
+
+</div>
+
+)
+
 }
 
-export default Archive;
+export default Archive

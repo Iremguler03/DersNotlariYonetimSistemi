@@ -3,18 +3,19 @@ using DersNotlariYonetimSistemi.API.Data;
 
 namespace DersNotlariYonetimSistemi.API.Seeder
 {
-    public class DataSeeder
+    public static class DataSeeder
     {
         public static void Seed(AppDbContext context)
         {
             if (!context.Users.Any())
             {
-                context.Users.Add(new User
+                var user = new User
                 {
                     Username = "admin",
-                    Password = "1234"
-                });
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("123456")
+                };
 
+                context.Users.Add(user);
                 context.SaveChanges();
             }
         }

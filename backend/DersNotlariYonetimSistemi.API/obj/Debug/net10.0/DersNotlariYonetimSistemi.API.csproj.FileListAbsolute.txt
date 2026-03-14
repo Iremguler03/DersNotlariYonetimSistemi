@@ -162,3 +162,4 @@ C:\Users\igule\DersNotlariYonetimSistemi\backend\DersNotlariYonetimSistemi.API\b
 C:\Users\igule\DersNotlariYonetimSistemi\backend\DersNotlariYonetimSistemi.API\obj\Debug\net10.0\DersNotlariYonetimSistemi.API.sourcelink.json
 C:\Users\igule\DersNotlariYonetimSistemi\backend\DersNotlariYonetimSistemi.API\bin\Debug\net10.0\DersNotlariYonetimSistemi.API.staticwebassets.runtime.json
 C:\Users\igule\DersNotlariYonetimSistemi\backend\DersNotlariYonetimSistemi.API\bin\Debug\net10.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Users\igule\DersNotlariYonetimSistemi\backend\DersNotlariYonetimSistemi.API\bin\Debug\net10.0\BCrypt.Net-Next.dll

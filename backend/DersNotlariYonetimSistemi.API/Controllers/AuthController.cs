@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using DersNotlariYonetimSistemi.API.Data;
-using DersNotlariYonetimSistemi.API.Models;
 using DersNotlariYonetimSistemi.API.DTOs;
 using DersNotlariYonetimSistemi.API.Helpers;
+using DersNotlariYonetimSistemi.API.Models;
+using BCrypt.Net;
 
 namespace DersNotlariYonetimSistemi.API.Controllers
 {
@@ -11,12 +12,12 @@ namespace DersNotlariYonetimSistemi.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly AppDbContext _context;
-        private readonly JwtService _jwt;
+        private readonly JwtService _jwtService;
 
-        public AuthController(AppDbContext context, IConfiguration configuration)
+        public AuthController(AppDbContext context, JwtService jwtService)
         {
             _context = context;
-            _jwt = new JwtService(configuration);
+            _jwtService = jwtService;
         }
 
         [HttpPost("register")]
@@ -25,7 +26,7 @@ namespace DersNotlariYonetimSistemi.API.Controllers
             var user = new User
             {
                 Username = dto.Username,
-                Password = dto.Password
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
             };
 
             _context.Users.Add(user);
@@ -39,10 +40,10 @@ namespace DersNotlariYonetimSistemi.API.Controllers
         {
             var user = _context.Users.FirstOrDefault(x => x.Username == dto.Username);
 
-            if (user == null || user.Password != dto.Password)
-                return BadRequest("Invalid credentials");
+            if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
+                return BadRequest("Kullanıcı adı veya şifre yanlış");
 
-            var token = _jwt.GenerateToken(user);
+            var token = _jwtService.GenerateToken(user);
 
             return Ok(new { token });
         }

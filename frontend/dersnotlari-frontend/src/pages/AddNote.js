@@ -1,48 +1,46 @@
-import React, { useState } from 'react';
-import api from '../services/api';
+import { useState } from "react";
+import api from "../services/api";
 
-function AddNote({ refresh }) {
-  const [noteTitle, setNoteTitle] = useState('');
-  const [noteDescription, setNoteDescription] = useState('');
-  const [file, setFile] = useState(null);
+function AddNote() {
 
-  const handleAdd = async (e) => {
-    e.preventDefault();
-    if (!noteTitle) { alert("Ders adı boş olamaz!"); return; }
+const [courseName,setCourseName]=useState("")
+const [description,setDescription]=useState("")
+const [file,setFile]=useState(null)
 
-    try {
-      const formData = new FormData();
-      formData.append('CourseName', noteTitle);
-      formData.append('Description', noteDescription || "");
-      if (file) formData.append('file', file);
+const addNote = async () => {
+  try{
 
-      const token = localStorage.getItem('token');
-      const response = await api.post('/notes', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`
-        }
-      });
+    const formData = new FormData()
 
-      console.log('Not eklendi:', response.data);
-      setNoteTitle('');
-      setNoteDescription('');
-      setFile(null);
-      refresh();
-    } catch (err) {
-      console.error('Not eklenemedi:', err);
-      alert('Not eklenemedi. Token geçerli olmalı ve tüm zorunlu alanlar dolu olmalı.');
-    }
-  };
+    formData.append("courseName",courseName)
+    formData.append("description",description)
+    formData.append("file",file)
 
-  return (
-    <form onSubmit={handleAdd}>
-      <input type="text" placeholder="Ders adı" value={noteTitle} onChange={(e)=>setNoteTitle(e.target.value)} required />
-      <textarea placeholder="Açıklama" value={noteDescription} onChange={(e)=>setNoteDescription(e.target.value)} />
-      <input type="file" onChange={(e)=>setFile(e.target.files[0])} />
-      <button type="submit">Not Ekle</button>
-    </form>
-  );
+    await api.post("/notes",formData)
+
+    alert("Not eklendi")
+
+  }catch(err){
+    console.log(err)
+  }
 }
 
-export default AddNote;
+return(
+
+<div>
+
+<input onChange={(e)=>setCourseName(e.target.value)} />
+
+<textarea onChange={(e)=>setDescription(e.target.value)} />
+
+<input type="file" onChange={(e)=>setFile(e.target.files[0])} />
+
+<button onClick={addNote}>Add Note</button>
+
+</div>
+
+)
+
+}
+
+export default AddNote

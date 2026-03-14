@@ -7,11 +7,13 @@ namespace DersNotlariYonetimSistemi.API.Models
         public int Id { get; set; }
 
         [Required]
-        public required string Username { get; set; }
-        
-        [Required]
-        public string Password { get; set; }
+        public string Username { get; set; }
 
-        public List<Note> Notes { get; set; }
+        [Required]
+        public string PasswordHash { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public List<Note>? Notes { get; set; }
     }
 }

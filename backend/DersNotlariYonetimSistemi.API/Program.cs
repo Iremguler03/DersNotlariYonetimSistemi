@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using DersNotlariYonetimSistemi.API.Data;
 using DersNotlariYonetimSistemi.API.Helpers;
 using System.Text;
+using DersNotlariYonetimSistemi.API.Seeder;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,23 +15,23 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // JWT Service
 builder.Services.AddScoped<JwtService>();
 
+// JWT Key
+var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
+
 // Authentication
-var key = Encoding.ASCII.GetBytes(builder.Configuration["JwtSettings:Secret"]);
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
+builder.Services.AddAuthentication("Bearer")
+.AddJwtBearer("Bearer", options =>
 {
     options.RequireHttpsMetadata = false;
     options.SaveToken = true;
+
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
         ValidateIssuer = false,
         ValidateAudience = false,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
         ClockSkew = TimeSpan.Zero
     };
 });
@@ -49,15 +50,22 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Middleware sırası önemli!
+// Middleware sırası
 app.UseCors("AllowAll");
+
 app.UseSwagger();
 app.UseSwaggerUI();
+
 app.UseStaticFiles();
 
-app.UseAuthentication(); // <-- ÖNCE
-app.UseAuthorization();  // <-- SONRA
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    DataSeeder.Seed(context);
+}
 app.Run();

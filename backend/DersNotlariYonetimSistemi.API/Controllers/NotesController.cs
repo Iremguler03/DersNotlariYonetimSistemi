@@ -1,81 +1,110 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using DersNotlariYonetimSistemi.API.Data;
-using DersNotlariYonetimSistemi.API.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using DersNotlariYonetimSistemi.API.Data;
+using DersNotlariYonetimSistemi.API.DTOs;
+using DersNotlariYonetimSistemi.API.Models;
 
 namespace DersNotlariYonetimSistemi.API.Controllers
 {
     [ApiController]
     [Route("api/notes")]
+    [Authorize]
     public class NotesController : ControllerBase
     {
         private readonly AppDbContext _context;
-        public NotesController(AppDbContext context) => _context = context;
+
+        public NotesController(AppDbContext context)
+        {
+            _context = context;
+        }
+
+        private int GetUserId()
+        {
+            return int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+        }
 
         [HttpGet]
-        public async Task<IActionResult> GetNotes()
+        public IActionResult GetNotes()
         {
-            var notes = await _context.Notes
-                .Where(n => n.DeletedAt == null)
-                .ToListAsync();
+            var userId = GetUserId();
+
+            var notes = _context.Notes
+                .Where(n => n.UserId == userId && n.DeletedAt == null)
+                .ToList();
+
             return Ok(notes);
         }
 
         [HttpPost]
-        [Authorize]
-        public async Task<IActionResult> AddNote([FromForm] string CourseName,
-                                                 [FromForm] string Description,
-                                                 IFormFile? file)
+        public IActionResult AddNote([FromForm] NoteDTO dto, IFormFile file)
         {
-            try
+            var userId = GetUserId();
+
+            string? filePath = null;
+
+            if (file != null)
             {
-                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-                if (userIdClaim == null) return Unauthorized("UserId token’dan alınamadı");
-                int userId = int.Parse(userIdClaim);
+                var path = Path.Combine("wwwroot/uploads", file.FileName);
 
-                string? filePath = null;
-                if (file != null)
-                {
-                    var folder = Path.Combine("wwwroot/uploads");
-                    if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+                using var stream = new FileStream(path, FileMode.Create);
+                file.CopyTo(stream);
 
-                    var uniqueFileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
-                    var fullPath = Path.Combine(folder, uniqueFileName);
-
-                    using (var stream = new FileStream(fullPath, FileMode.Create))
-                        await file.CopyToAsync(stream);
-
-                    filePath = "/uploads/" + uniqueFileName;
-                }
-
-                var note = new Note
-                {
-                    CourseName = CourseName,
-                    Description = Description,
-                    FilePath = filePath,
-                    UserId = userId,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
-
-                _context.Notes.Add(note);
-                await _context.SaveChangesAsync();
-                return Ok(note);
+                filePath = "/uploads/" + file.FileName;
             }
-            catch (Exception ex)
+
+            var note = new Note
             {
-                return StatusCode(500, ex.Message);
-            }
+                CourseName = dto.CourseName,
+                Description = dto.Description,
+                FilePath = filePath,
+                UserId = userId
+            };
+
+            _context.Notes.Add(note);
+            _context.SaveChanges();
+
+            return Ok(note);
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteNote(int id)
+        public IActionResult Delete(int id)
         {
-            var note = await _context.Notes.FindAsync(id);
-            if (note == null) return NotFound();
+            var note = _context.Notes.Find(id);
+
+            if (note == null)
+                return NotFound();
+
             note.DeletedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
+
+            _context.SaveChanges();
+
+            return Ok();
+        }
+
+        [HttpGet("archive")]
+        public IActionResult Archive()
+        {
+            var userId = GetUserId();
+
+            var notes = _context.Notes
+                .Where(n => n.UserId == userId && n.DeletedAt != null)
+                .ToList();
+
+            return Ok(notes);
+        }
+
+        [HttpDelete("hard/{id}")]
+        public IActionResult HardDelete(int id)
+        {
+            var note = _context.Notes.Find(id);
+
+            if (note == null)
+                return NotFound();
+
+            _context.Notes.Remove(note);
+            _context.SaveChanges();
+
             return Ok();
         }
     }
