@@ -24,6 +24,54 @@ namespace DersNotlariYonetimSistemi.API.Controllers
             return int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
         }
 
+        [HttpPut("{id}")]
+        public IActionResult UpdateNote(int id, [FromForm] NoteDTO dto, IFormFile? file)
+        {
+            var userId = GetUserId();
+
+            var note = _context.Notes
+                .FirstOrDefault(n => n.Id == id && n.UserId == userId);
+
+            if (note == null)
+                return NotFound();
+
+            note.CourseName = dto.CourseName;
+            note.Description = dto.Description;
+            note.UpdatedAt = DateTime.UtcNow;
+
+            if (file != null)
+            {
+                var path = Path.Combine("wwwroot/uploads", file.FileName);
+
+                using var stream = new FileStream(path, FileMode.Create);
+                file.CopyTo(stream);
+
+                note.FilePath = "/uploads/" + file.FileName;
+            }
+
+            _context.SaveChanges();
+
+            return Ok(note);
+        }
+
+        [HttpPut("restore/{id}")]
+        public IActionResult Restore(int id)
+        {
+            var userId = GetUserId();
+
+            var note = _context.Notes
+                .FirstOrDefault(n => n.Id == id && n.UserId == userId);
+
+            if (note == null)
+                return NotFound();
+
+            note.DeletedAt = null;
+
+            _context.SaveChanges();
+
+            return Ok();
+        }
+
         [HttpGet]
         public IActionResult GetNotes()
         {

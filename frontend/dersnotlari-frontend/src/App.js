@@ -1,7 +1,7 @@
 // App.js
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useState } from "react";
-
+import EditNote from "./pages/EditNote"
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -21,6 +21,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/notes" element={isAuthenticated ? <Notes /> : <Login setIsAuthenticated={setIsAuthenticated} />} />
         <Route path="/addnote" element={isAuthenticated ? <AddNote /> : <Login setIsAuthenticated={setIsAuthenticated} />} />
+        <Route path="/edit-note/:id" element={<EditNote/>}/>
       </Routes>
     </Router>
   );
