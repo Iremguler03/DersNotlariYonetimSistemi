@@ -24,16 +24,17 @@ namespace DersNotlariYonetimSistemi.API.Controllers
             return int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
         }
 
+        // ✅ UPDATE (Sadece silinmemiş notlar)
         [HttpPut("{id}")]
         public IActionResult UpdateNote(int id, [FromForm] NoteDTO dto, IFormFile? file)
         {
             var userId = GetUserId();
 
             var note = _context.Notes
-                .FirstOrDefault(n => n.Id == id && n.UserId == userId);
+                .FirstOrDefault(n => n.Id == id && n.UserId == userId && n.DeletedAt == null);
 
             if (note == null)
-                return NotFound();
+                return BadRequest("Not bulunamadı veya silinmiş");
 
             note.CourseName = dto.CourseName;
             note.Description = dto.Description;
@@ -54,6 +55,7 @@ namespace DersNotlariYonetimSistemi.API.Controllers
             return Ok(note);
         }
 
+        // ✅ RESTORE (Arşivden geri yükle)
         [HttpPut("restore/{id}")]
         public IActionResult Restore(int id)
         {
@@ -62,16 +64,18 @@ namespace DersNotlariYonetimSistemi.API.Controllers
             var note = _context.Notes
                 .FirstOrDefault(n => n.Id == id && n.UserId == userId);
 
-            if (note == null)
-                return NotFound();
+            if (note == null || note.DeletedAt == null)
+                return NotFound("Not arşivde değil");
 
             note.DeletedAt = null;
+            note.UpdatedAt = DateTime.UtcNow;
 
             _context.SaveChanges();
 
-            return Ok();
+            return Ok("Not geri yüklendi");
         }
 
+        // ✅ NORMAL NOTLAR
         [HttpGet]
         public IActionResult GetNotes()
         {
@@ -84,8 +88,22 @@ namespace DersNotlariYonetimSistemi.API.Controllers
             return Ok(notes);
         }
 
+        // ✅ ARŞİV
+        [HttpGet("archive")]
+        public IActionResult Archive()
+        {
+            var userId = GetUserId();
+
+            var notes = _context.Notes
+                .Where(n => n.UserId == userId && n.DeletedAt != null)
+                .ToList();
+
+            return Ok(notes);
+        }
+
+        // ✅ ADD
         [HttpPost]
-        public IActionResult AddNote([FromForm] NoteDTO dto, IFormFile file)
+        public IActionResult AddNote([FromForm] NoteDTO dto, IFormFile? file)
         {
             var userId = GetUserId();
 
@@ -106,7 +124,9 @@ namespace DersNotlariYonetimSistemi.API.Controllers
                 CourseName = dto.CourseName,
                 Description = dto.Description,
                 FilePath = filePath,
-                UserId = userId
+                UserId = userId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
             };
 
             _context.Notes.Add(note);
@@ -115,45 +135,42 @@ namespace DersNotlariYonetimSistemi.API.Controllers
             return Ok(note);
         }
 
+        // ✅ SOFT DELETE (Arşive atar)
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            var note = _context.Notes.Find(id);
+            var userId = GetUserId();
+
+            var note = _context.Notes
+                .FirstOrDefault(n => n.Id == id && n.UserId == userId && n.DeletedAt == null);
 
             if (note == null)
-                return NotFound();
+                return NotFound("Not bulunamadı");
 
             note.DeletedAt = DateTime.UtcNow;
+            note.UpdatedAt = DateTime.UtcNow;
 
             _context.SaveChanges();
 
-            return Ok();
+            return Ok("Not arşive taşındı");
         }
 
-        [HttpGet("archive")]
-        public IActionResult Archive()
-        {
-            var userId = GetUserId();
-
-            var notes = _context.Notes
-                .Where(n => n.UserId == userId && n.DeletedAt != null)
-                .ToList();
-
-            return Ok(notes);
-        }
-
+        // ✅ HARD DELETE (Kalıcı silme)
         [HttpDelete("hard/{id}")]
         public IActionResult HardDelete(int id)
         {
-            var note = _context.Notes.Find(id);
+            var userId = GetUserId();
+
+            var note = _context.Notes
+                .FirstOrDefault(n => n.Id == id && n.UserId == userId && n.DeletedAt != null);
 
             if (note == null)
-                return NotFound();
+                return NotFound("Not arşivde değil");
 
             _context.Notes.Remove(note);
             _context.SaveChanges();
 
-            return Ok();
+            return Ok("Kalıcı olarak silindi");
         }
     }
 }

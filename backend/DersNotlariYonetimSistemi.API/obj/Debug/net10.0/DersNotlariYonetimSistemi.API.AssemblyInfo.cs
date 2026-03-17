@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DersNotlariYonetimSistemi.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+523d4a68d91a90caac6374a265466d7b89edf2de")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+689322fa67bb92bd3ddb0370c07d7d3e5c8d6616")]
 [assembly: System.Reflection.AssemblyProductAttribute("DersNotlariYonetimSistemi.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DersNotlariYonetimSistemi.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

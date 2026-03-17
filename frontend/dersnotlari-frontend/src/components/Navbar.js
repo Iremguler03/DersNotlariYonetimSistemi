@@ -16,13 +16,25 @@ export default function Navbar({ isAuthenticated, setIsAuthenticated }) {
       <div style={styles.links}>
         {isAuthenticated ? (
           <>
-            <Link to="/addnote" style={styles.link}>Not Ekle</Link>
-            <button onClick={logout} style={styles.button}>Çıkış Yap</button>
+            <Link to="/addnote" style={styles.link}>
+              Not Ekle
+            </Link>
+            <Link to="/archive" style={styles.link}>
+              Arşiv
+            </Link>{" "}
+            {/* 👈 EKLENDİ */}
+            <button onClick={logout} style={styles.button}>
+              Çıkış Yap
+            </button>
           </>
         ) : (
           <>
-            <Link to="/login" style={styles.link}>Giriş Yap</Link>
-            <Link to="/register" style={styles.link}>Kayıt Ol</Link>
+            <Link to="/login" style={styles.link}>
+              Giriş Yap
+            </Link>
+            <Link to="/register" style={styles.link}>
+              Kayıt Ol
+            </Link>
           </>
         )}
       </div>
