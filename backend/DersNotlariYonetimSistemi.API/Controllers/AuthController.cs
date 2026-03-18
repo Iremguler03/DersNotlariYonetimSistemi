@@ -38,9 +38,9 @@ namespace DersNotlariYonetimSistemi.API.Controllers
         [HttpPost("login")]
         public IActionResult Login(LoginDTO dto)
         {
-            var user = _context.Users.FirstOrDefault(x => x.Username == dto.Username);
+            var user = _context.Users.FirstOrDefault(x => x.Username == dto.username);
 
-            if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
+            if (user == null || !BCrypt.Net.BCrypt.Verify(dto.password, user.PasswordHash))
                 return BadRequest("Kullanıcı adı veya şifre yanlış");
 
             var token = _jwtService.GenerateToken(user);
