@@ -20,7 +20,7 @@ cd DersNotlariYonetimSistemi\frontend\dersnotlari-frontend
 npm install
 npm start
 
---Git--
+
 cd DersNotlariYonetimSistemi 
 git init 
 git add . 
