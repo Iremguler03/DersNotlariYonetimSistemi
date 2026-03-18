@@ -9,13 +9,13 @@ Bu projenin amacı, kullanıcıların ders notlarını kolayca yönetebileceği 
 
 
 ## Kurulum ve Çalıştırma
---Backend--
+
 cd DersNotlariYonetimSistemi\backend\DersNotlariYonetimSistemi.API
 dotnet restore
 dotnet build
 dotnet run
 
---Frontend--
+
 cd DersNotlariYonetimSistemi\frontend\dersnotlari-frontend
 npm install
 npm start
