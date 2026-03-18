@@ -16,6 +16,9 @@ export default function Navbar({ isAuthenticated, setIsAuthenticated }) {
       <div style={styles.links}>
         {isAuthenticated ? (
           <>
+            <Link to="/notes" style={styles.link}>
+              Notlar
+            </Link>
             <Link to="/addnote" style={styles.link}>
               Not Ekle
             </Link>

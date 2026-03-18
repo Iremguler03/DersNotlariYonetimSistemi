@@ -1,4 +1,3 @@
-// Notes.js
 import { useEffect, useState } from "react";
 import API from "../services/api";
 import { useNavigate } from "react-router-dom";
@@ -6,6 +5,19 @@ import { useNavigate } from "react-router-dom";
 export default function Notes() {
   const navigate = useNavigate();
   const [notes, setNotes] = useState([]);
+
+  // ✅ Tarih formatlama
+  const formatDate = (date) => {
+    if (!date) return "";
+
+    return new Date(date).toLocaleString("tr-TR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
   const getNotes = async () => {
     try {
@@ -18,7 +30,7 @@ export default function Notes() {
       setNotes(res.data);
     } catch (err) {
       console.error(err);
-      alert("Notlar alınamadı!");
+      alert("Notlar Alınamadı!");
     }
   };
 
@@ -27,7 +39,6 @@ export default function Notes() {
   }, []);
 
   const deleteNote = async (id) => {
-    // ✅ Popup ekledik
     if (!window.confirm("Bu not arşive taşınacak. Emin misin?")) return;
 
     try {
@@ -37,7 +48,7 @@ export default function Notes() {
         },
       });
 
-      getNotes(); // silince tekrar listele
+      getNotes();
     } catch (err) {
       console.error(err);
       alert("Not silinemedi!");
@@ -51,10 +62,25 @@ export default function Notes() {
       <div style={styles.notesGrid}>
         {notes.length > 0 ? (
           notes.map((note) => (
-            <div key={note.id} style={styles.noteCard}>
+            <div
+              key={note.id}
+              style={styles.noteCard}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.transform = "scale(1.03)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.transform = "scale(1)")
+              }
+            >
               <h3 style={styles.noteTitle}>{note.courseName}</h3>
               <p style={styles.noteDesc}>{note.description}</p>
 
+              {/* ✅ Tarihler */}
+              <p style={styles.date}>
+                📅 Oluşturulma Tarihi: {formatDate(note.createdAt)}
+              </p>
+
+              {/* ✅ Dosya */}
               {note.filePath && (
                 <a
                   href={`http://localhost:5020${note.filePath}`}
@@ -62,10 +88,11 @@ export default function Notes() {
                   rel="noreferrer"
                   style={styles.fileLink}
                 >
-                  Dosyayı Aç
+                  Yüklenen Dosyayı Aç
                 </a>
               )}
 
+              {/* ✅ Butonlar */}
               <div style={styles.buttons}>
                 <button
                   onClick={() => deleteNote(note.id)}
@@ -73,6 +100,7 @@ export default function Notes() {
                 >
                   Arşive Taşı
                 </button>
+
                 <button
                   onClick={() => navigate(`/edit-note/${note.id}`)}
                   style={styles.update}
@@ -113,9 +141,6 @@ const styles = {
     boxShadow: "0 6px 15px rgba(0,0,0,0.15)",
     transition: "transform 0.2s",
   },
-  noteCardHover: {
-    transform: "scale(1.03)",
-  },
   noteTitle: {
     color: "#f06292",
     marginBottom: "10px",
@@ -124,6 +149,11 @@ const styles = {
     fontSize: "14px",
     color: "#333",
     marginBottom: "10px",
+  },
+  date: {
+    fontSize: "12px",
+    color: "#777",
+    marginBottom: "5px",
   },
   fileLink: {
     display: "block",
@@ -144,7 +174,6 @@ const styles = {
     padding: "8px 15px",
     borderRadius: "6px",
     cursor: "pointer",
-    transition: "background 0.2s",
   },
   update: {
     background: "#f06292",
@@ -153,6 +182,5 @@ const styles = {
     padding: "8px 15px",
     borderRadius: "6px",
     cursor: "pointer",
-    transition: "background 0.2s",
   },
 };

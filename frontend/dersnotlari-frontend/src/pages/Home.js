@@ -9,8 +9,8 @@ export default function Home() {
         <p style={styles.subtitle}>
         Başlamak için giriş yapın veya kayıt olun!        </p>
         <div style={styles.buttons}>
-          <Link to="/login" style={styles.button}>Login</Link>
-          <Link to="/register" style={styles.button}>Register</Link>
+          <Link to="/login" style={styles.button}>Giriş Yapın</Link>
+          <Link to="/register" style={styles.button}>Kayıt Olun</Link>
         </div>
       </div>
     </div>
@@ -23,7 +23,6 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    backgroundImage: "url('https://images.unsplash.com/photo-1612831660801-6f0a9d3db89e?auto=format&fit=crop&w=1470&q=80')",
     backgroundSize: "cover",
     backgroundPosition: "center",
     backgroundRepeat: "no-repeat",

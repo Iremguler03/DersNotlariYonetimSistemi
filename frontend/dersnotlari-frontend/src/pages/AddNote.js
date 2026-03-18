@@ -37,13 +37,13 @@ export default function AddNote() {
       <div style={styles.formContainer}>
         <h2 style={styles.title}>Yeni Bir Not Ekle</h2>
         <input
-          placeholder="Course Name"
+          placeholder="Kurs Adı"
           value={courseName}
           onChange={(e) => setCourseName(e.target.value)}
           style={styles.input}
         />
         <textarea
-          placeholder="Description"
+          placeholder="Açıklama"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           style={styles.textarea}

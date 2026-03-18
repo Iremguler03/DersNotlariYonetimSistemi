@@ -24,12 +24,12 @@ export default function Login({ setIsAuthenticated }) {
       <div style={styles.formContainer}>
         <h2 style={styles.title}>Tekrar Hoş Geldiniz</h2>
         <input
-          placeholder="Username"
+          placeholder="Kullanıcı Adı"
           onChange={(e) => setUsername(e.target.value)}
           style={styles.input}
         />
         <input
-          placeholder="Password"
+          placeholder="Şifre"
           type="password"
           onChange={(e) => setPassword(e.target.value)}
           style={styles.input}
